@@ -19,6 +19,7 @@ def send_to_telegram(msg):
 
 @app.route('/hook', methods=['POST'])
 def webhook():
+    print("Ham veri:", request.data.decode())
     try:
         print("Header:", request.headers.get("Content-Type"))
         print("Ham veri:", request.data.decode())
