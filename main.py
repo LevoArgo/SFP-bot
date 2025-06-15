@@ -9,7 +9,12 @@ CHAT_ID = "5891187255"
 
 @app.route("/hook", methods=["POST"])
 def hook():
-    data = request.get_json()
+    try:
+    data = request.get_json(force=True)
+    print("Webhook içeriği:", data)
+except Exception as e:
+    print("Webhook JSON hatası:", str(e))
+    data = {}
 
     # TradingView'den gelen mesaj varsa al, yoksa varsayılan mesaj yolla
     incoming_msg = data.get("message", "📣 SFP sinyali tetiklendi kralım!")
