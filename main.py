@@ -1,34 +1,41 @@
 from flask import Flask, request
 import requests
+import json
 
 app = Flask(__name__)
 
-# Sabit bot bilgileri
-TELEGRAM_TOKEN = "7964205504:AAEWHnCAQN8kSWQMlS2ocrjOFm3AL2a_l2M"
-CHAT_ID = "5891187255"
+# Telegram bilgileri
+TELEGRAM_BOT_TOKEN = "bot7964205504:AAEWHnCAQN8kSWQMlS2ocrjOFm3AL2a_l2M"  # 🔴 Buraya kendi bot token'ını yaz
+CHAT_ID = "5891187255"  # 🔴 Buraya kendi chat_id'ni yaz
 
-@app.route("/hook", methods=["POST"])
-def hook():
-    try:
-        data = request.get_json(force=True)
-        print("Webhook içeriği:", data)
-    except Exception as e:
-        print("Webhook JSON hatası:", str(e))
-        data = {}
-
-    # TradingView'den gelen mesaj varsa al, yoksa varsayılan mesaj yolla
-    incoming_msg = data.get("message", "📣 SFP sinyali tetiklendi kralım!")
-
-    # Telegram'a POST isteği gönder
-    response = requests.post(
-        f"https://api.telegram.org/bot7964205504:AAEWHnCAQN8kSWQMlS2ocrjOFm3AL2a_l2M/sendMessage",
-        data={"chat_id": "5891187255", "text": incoming_msg}
-    )
-
-    # Log için istersen bu satırı da bırakabilirsin:
+def send_to_telegram(msg):
+    url = f"https://api.telegram.org/{7964205504:AAEWHnCAQN8kSWQMlS2ocrjOFm3AL2a_l2M}/sendMessage"
+    payload = {
+        "chat_id": 5891187255,
+        "text": msg
+    }
+    response = requests.post(url, json=payload)
     print("Telegram yanıtı:", response.text)
 
-    return "ok", 200
+@app.route('/hook', methods=['POST'])
+def webhook():
+    try:
+        print("Header:", request.headers.get("Content-Type"))
+        print("Ham veri:", request.data.decode())
+
+        if request.is_json:
+            data = request.get_json()
+        else:
+            data = json.loads(request.data.decode())
+
+        print("Webhook içeriği:", data)
+
+        msg = data.get("message", "⚠️ Boş mesaj geldi kralım")
+        send_to_telegram(msg)
+        return "OK", 200
+    except Exception as e:
+        print("Webhook JSON hatası:", str(e))
+        return "Error", 400
 
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=10000)
